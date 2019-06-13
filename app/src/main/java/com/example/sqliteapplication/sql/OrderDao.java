@@ -27,7 +27,9 @@ public class OrderDao {
 
     public OrderDao(Context mContext){
         this.mContext = mContext;
+        // 代码将在单独的线程中向数据库写入数据，
         orderDBHelper = new OrderDBHelper(mContext);
+        DatabaseManager.initializeInstance(orderDBHelper);
     }
 
     /**
@@ -107,20 +109,27 @@ public class OrderDao {
 
         try{
             // 对于“增删改”这类对表内容变换的操作，需先调用getWritableDatabase()
-            db = orderDBHelper.getWritableDatabase();
+            db = DatabaseManager.getInstance().openDatabase();
+            Log.e("TAG",db+"--=--=-=-=");
+            // 在android的使用数据库时，sqlite数据库默认情况下是“一个连接存在与一个事务”。
+            // 有时候会操作大批量的数据，比如批量的写操作，如何让批量的操作在一个事物中完成呢？
+            // 开始事务
             db.beginTransaction();
 
             db.execSQL("insert into " + OrderDBHelper.TABLE_NAME + "(Id, CustomName, OrderPrice) values (1,'one',10)");
             db.execSQL("insert into " + OrderDBHelper.TABLE_NAME + "(Id, CustomName, OrderPrice) values (2,'two',20)");
             db.execSQL("insert into " + OrderDBHelper.TABLE_NAME + "(Id, CustomName, OrderPrice) values (3,'three',20)");
 
+            // 设置事务标志为成功，当结束事务时就会提交事务
             db.setTransactionSuccessful();
         }catch (Exception e){
             Log.e(TAG,"",e);
         }finally {
             if (db != null){
+                // 处理完成
                 db.endTransaction();
-                db.close();
+                //  db.close();
+                DatabaseManager.getInstance().closeDatabase();
             }
         }
     }
@@ -132,7 +141,7 @@ public class OrderDao {
         SQLiteDatabase db = null;
 
         try{
-            db = orderDBHelper.getWritableDatabase();
+            db = DatabaseManager.getInstance().openDatabase();
             db.beginTransaction();
 
             // insert into Orders(Id, CustomName, OrderPrice) values (47, "fou", 40);
@@ -153,7 +162,8 @@ public class OrderDao {
         }finally{
             if (db!=null){
                 db.endTransaction();
-                db.close();
+                //  db.close();
+                DatabaseManager.getInstance().closeDatabase();
             }
         }
         return false;
@@ -166,7 +176,7 @@ public class OrderDao {
         SQLiteDatabase db = null;
 
         try{
-            db = orderDBHelper.getWritableDatabase();
+            db = DatabaseManager.getInstance().openDatabase();
             db.beginTransaction();
 
             // delete from Orders where Id = 7
@@ -180,7 +190,8 @@ public class OrderDao {
         }finally{
             if (db!=null){
                 db.endTransaction();
-                db.close();
+                //  db.close();
+                DatabaseManager.getInstance().closeDatabase();
             }
         }
         return false;
@@ -193,7 +204,7 @@ public class OrderDao {
         SQLiteDatabase db = null;
 
         try{
-            db = orderDBHelper.getWritableDatabase();
+            db = DatabaseManager.getInstance().openDatabase();
             db.beginTransaction();
 
             // update Orders set OrderPrice = 100 where Id = 1
@@ -208,7 +219,8 @@ public class OrderDao {
         }finally{
             if (db!=null){
                 db.endTransaction();
-                db.close();
+                //  db.close();
+                DatabaseManager.getInstance().closeDatabase();
             }
         }
         return false;
@@ -223,7 +235,7 @@ public class OrderDao {
         Cursor cursor = null;
 
         try{
-            db = orderDBHelper.getWritableDatabase();
+            db = orderDBHelper.getReadableDatabase();
 
             // select * from Orders where CustomName = 'one'
             cursor = db.query(OrderDBHelper.TABLE_NAME,ORDER_COLUMNS,"CustomName = ?",new String[]{"one"},null,null,null);
@@ -339,7 +351,7 @@ public class OrderDao {
             if (sql.contains("select")){
                 Toast.makeText(mContext, "Sorry，还没处理select语句", Toast.LENGTH_SHORT).show();
             }else if (sql.contains("insert") || sql.contains("update") || sql.contains("delete")){
-                db = orderDBHelper.getWritableDatabase();
+                db = DatabaseManager.getInstance().openDatabase();
                 db.beginTransaction();
                 db.execSQL(sql);
                 db.setTransactionSuccessful();
@@ -351,7 +363,8 @@ public class OrderDao {
         } finally {
             if (db != null) {
                 db.endTransaction();
-                db.close();
+                //  db.close();
+                DatabaseManager.getInstance().closeDatabase();
             }
         }
     }
