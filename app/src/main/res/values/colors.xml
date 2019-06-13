@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="common_color">#ffffff</color>
+    <color name="common_pressed">#f5f2eb</color>
+    <color name="gray_color">#878278</color>
+    <color name="hover_gray_color">#dadada</color>
+    <color name="edittext_color">#625e59</color>
+    <color name="edittext_hint_color">#ababab</color>
+</resources>
