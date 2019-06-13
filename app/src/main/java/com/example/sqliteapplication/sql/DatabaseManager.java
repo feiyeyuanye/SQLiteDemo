@@ -56,5 +56,4 @@ public class DatabaseManager {
             mDatabase.close();
         }
     }
-
 }
